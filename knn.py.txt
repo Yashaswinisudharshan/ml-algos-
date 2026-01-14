@@ -1,0 +1,54 @@
+KNN Regressor
+It predicts a continuous numerical value by taking the average of the target values of the K nearest neighbours to the given point; for instance: house price, salary, and marks. It works on the idea that similar points tend to have similar output values.
+
+For two points x and y:
+
+Euclidean distance=√( Σ (xᵢ − yᵢ)² )
+
+Prediction Formula: If the K nearest neighbours have values y1,y2,y3,...yk: ŷ = (1/k) Σ yᵢ
+import pandas as pd
+train_df =pd.read_csv('/content/sample_data/california_housing_train.csv')
+test_df = pd.read_csv('/content/sample_data/california_housing_test.csv')
+
+print(train_df.head())
+X_train=train_df[['median_income', 'housing_median_age']].values
+y_train=train_df['median_house_value'].values
+X_test=test_df[['median_income']].values
+y_test=test_df['median_house_value'].values
+print(X_train.shape, y_train.shape)
+print(X_test.shape, y_test.shape)
+import numpy as np
+class KNNRegressor:
+  def __init__(self,k=5):
+    self.k=k
+  def fit(self,X,y):
+    self.X_train=X
+    self.y_train=y
+  def euclidean_distance(self,x1,x2):
+    return np.sqrt(np.sum((x1-x2)**2))
+  def predict(self,X_test):
+    predictions=[]
+    for x in X_test:
+      distances=[]
+      for i in range(len(self.X_train)):
+        dist=self.euclidean_distance(x,self.X_train[i])
+        distances.append((dist,self.y_train[i]))
+      distances.sort(key=lambda x:x[0])
+      k_nearest=distances[:self.k]
+      avg_value=np.mean([val for _,val in k_nearest])
+      predictions.append(avg_value)
+    return np.array(predictions)
+
+knn=KNNRegressor(k=5)
+knn.fit(X_train,y_train)
+y_pred=knn.predict(X_test)
+print("Predictions",y_pred[:5])
+print("\nActual values: ",y_test[:5])
+#from sklearn
+from sklearn.neighbors import KNeighborsRegressor
+sk_model=KNeighborsRegressor(n_neighbors=5)
+sk_model.fit(X_train,y_train)
+sk_pred= sk_model.predict(X_test)
+print("Predictions from sklearn:",sk_pred[:5])
+
+
